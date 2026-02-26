@@ -1,22 +1,18 @@
-import os
 from flask import Flask, request, jsonify
 import sqlite3
 import logging
 from datetime import datetime, timezone
-from dotenv import load_dotenv
 from logging.handlers import RotatingFileHandler
+from config import Config
 
-
-load_dotenv()
-
-DATABASE = os.getenv("DATABASE", "database.db")
-HOST = os.getenv("FLASK_HOST", "0.0.0.0")
-PORT = int(os.getenv("FLASK_PORT", 5000))
 
 app = Flask(__name__)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(BASE_DIR, "database.db")
+app.config.from_object(Config)
+
+DATABASE = Config.DATABASE
+HOST = Config.HOST
+PORT = Config.PORT
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -96,7 +92,20 @@ def get_users():
         logger.error("Error fetching users: %s", e)
         return jsonify({"error": "Internal server error"}), 500
 
+@app.route('/debug-config')
+def debug_config():
+    return {
+        "database": app.config.get("DATABASE"),
+        "host": app.config.get("HOST"),
+        "port": app.config.get("PORT")
+    }
   
 if __name__ == "__main__":
     init_db()
-    app.run(host=HOST, port=PORT)
+    # app.run(host=HOST, port=PORT)
+    print(f"--- CONFIG TEST ---")
+    print(f"Database Path: {Config.DATABASE}")
+    print(f"Host: {Config.HOST}")
+    print(f"Port: {Config.PORT}")
+    print(f"-------------------")
+    app.run(host=Config.HOST, port=Config.PORT)
