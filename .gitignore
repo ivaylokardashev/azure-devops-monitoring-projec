@@ -1,4 +1,17 @@
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Environment variables (Your secrets!)
+.env
+
+# Database files
+*.db
+
+# Virtual environments
+venv/
+env/
+
 .history/
 app.log*
-.env
-*.db
+
