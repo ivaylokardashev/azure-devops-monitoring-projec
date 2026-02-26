@@ -1,4 +1,4 @@
 .history/
-app.log
+app.log*
 .env
 *.db
