@@ -1,2 +1,4 @@
 .history/
 app.log
+.env
+database.db
