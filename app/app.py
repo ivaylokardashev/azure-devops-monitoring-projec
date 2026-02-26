@@ -4,6 +4,7 @@ import sqlite3
 import logging
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+from logging.handlers import RotatingFileHandler
 
 
 load_dotenv()
@@ -17,12 +18,21 @@ app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "database.db")
 
-# Configure logging
-logging.basicConfig(
-    filename='app.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+handler = RotatingFileHandler(
+    "app.log",
+    maxBytes=1000000,   # 1MB per file
+    backupCount=3       # keep 3 old log files
 )
+
+formatter = logging.Formatter(
+    "%(asctime)s - %(levelname)s - %(message)s"
+)
+
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 def init_db():
@@ -42,7 +52,7 @@ def init_db():
 
 @app.route("/health", methods=["GET"])
 def health():
-    logging.info("Health check endpoint accessed")
+    logger.info("Health check endpoint accessed")
     return jsonify({"status": "healthy"}), 200
 
 
@@ -51,7 +61,7 @@ def create_user():
     data = request.get_json()
 
     if not data or 'name' not in data or 'email' not in data:
-        logging.warning("Invalid input data: %s", data)
+        logger.warning("Invalid input data: %s", data)
         return jsonify({"error": "Invalid input data"}), 400
     
     try:
@@ -63,10 +73,10 @@ def create_user():
         conn.commit()
         conn.close()
 
-        logging.info("User created: %s", data['email'])
+        logger.info("User created: %s", data['email'])
         return jsonify({"message": "User created successfully"}), 201
     except Exception as e:
-        logging.error("Error creating user: %s", e)
+        logger.error("Error creating user: %s", e)
         return jsonify({"error": "Internal server error"}), 500
     
 
@@ -80,10 +90,10 @@ def get_users():
         conn.close()
 
         user_list = [{"id": user[0], "name": user[1], "email": user[2], "created_at": user[3]} for user in users]
-        logging.info("Fetched %d users", len(user_list))
+        logger.info("Fetched %d users", len(user_list))
         return jsonify(user_list), 200
     except Exception as e:
-        logging.error("Error fetching users: %s", e)
+        logger.error("Error fetching users: %s", e)
         return jsonify({"error": "Internal server error"}), 500
 
   
