@@ -1,3 +1,4 @@
+import traceback
 from flask import Flask, request, jsonify
 import sqlite3
 import logging
@@ -72,7 +73,7 @@ def create_user():
         logger.info("User created: %s", data['email'])
         return jsonify({"message": "User created successfully"}), 201
     except Exception as e:
-        logger.error("Error creating user: %s", e)
+        logger.error("Error creating user: %s", f"{str(e)}\n{traceback.format_exc()}")  
         return jsonify({"error": "Internal server error"}), 500
     
 
